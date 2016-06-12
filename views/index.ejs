@@ -1,3 +1,5 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
 <% if (!user) { %>
 	<h2>Welcome! Please log in.</h2>
 	<p><a href="auth/steam">Sign On with Steam</a></p>
@@ -5,6 +7,26 @@
 	<h2>Hello, <%= user.displayName %>. - <a href='logout'>Logout</a></h2>
 <% } %>
 
+<% if(users) {%>
+  <% for(i=0;i<users.length;i++){ %>
+    <div id="user_<%=users[i]%>">
+    </div>
+    <div id="games_<%=users[i]%>">
+    </div>
+
+<script>
+<% console.log(player) %>
+        $( "#user_<%=users[i]%>" ).append( "<h2><%=player.personaname%></h2>" );
+        $( "#games_<%=users[i]%>" ).append( "<ul>" );
+
+        $( "#games_<%=users[i]%>" ).append( "</ul>" );
+</script>
+
+
+  <% } %>
+<% } %>
+
 <!-- Should redirect to homepage if you're not logged in -->
 <p><a href="account">See Account Information</a></p>
+
 

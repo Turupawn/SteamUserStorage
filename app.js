@@ -4,7 +4,18 @@ var express = require('express')
   , session = require('express-session')
   , SteamStrategy = require('passport-steam').Strategy
   , sqlite3 = require('sqlite3').verbose()
-  , db = new sqlite3.Database('database.sqlite3');
+  , db = new sqlite3.Database('database.sqlite3')
+  , jquery = require('jquery');
+
+var jsdom=require('jsdom');
+var request = require("request")
+var steam_api_key = "XXXXXXXXx"
+//var $=require('jquery')(jsdom.jsdom().createWindow());
+
+//var XMLHttpRequest=require('xmlhttprequest').XMLHttpRequest;
+
+//cross domain
+//$.support.cors=true;
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -28,7 +39,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SteamStrategy({
     returnURL: 'http://localhost:3000/auth/steam/return',
     realm: 'http://localhost:3000/',
-    apiKey: 'XXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    apiKey: steam_api_key
   },
   function(identifier, profile, done) {
     // asynchronous verification, for effect...
@@ -39,35 +50,28 @@ passport.use(new SteamStrategy({
       // to associate the Steam account with a user record in your database,
       // and return that user instead.
 
-
-
-
-
-  exists = false
-    db.all("SELECT steamid FROM users", function(err, rows) {  
-        rows.forEach(function (row) {  
+      exists = false
+      db.all("SELECT steamid FROM users", function(err, rows)
+      {  
+        rows.forEach(function (row)
+        {  
           if(row.steamid==profile._json.steamid)
           {
-            console.log("Check")
             exists = true
           }
         })  
 
 
-    if(!exists)
-    {
-      db.serialize(function() {
-        console.log("Wut")
-        var stmt = db.prepare("INSERT INTO users VALUES (?)");
-        stmt.run(profile._json.steamid);
-        stmt.finalize();
-      })
-    }
-
-
-    });   
-
-  //db.close();
+        if(!exists)
+        {
+          db.serialize(function()
+          {
+            var stmt = db.prepare("INSERT INTO users VALUES (?)");
+            stmt.run(profile._json.steamid);
+            stmt.finalize();
+          })
+        }
+      });
 
       profile.identifier = identifier;
 
@@ -95,7 +99,47 @@ app.use(passport.session());
 app.use(express.static(__dirname + '/../../public'));
 
 app.get('/', function(req, res){
-  res.render('index', { user: req.user });
+
+  exists = false
+  var player="fdsa"
+  var games
+
+  db.all("SELECT steamid FROM users", function(err, rows)
+  {
+    users=[]
+    rows.forEach(function (row)
+    {
+      users.push(row.steamid);
+
+      var url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="+steam_api_key+"&steamids="+row.steamid
+      request(
+      {
+        url: url,
+        json: true
+      }, function (error, response, body)
+      {
+        if(body.response.players)
+        {
+          player = body.response.players[0]
+        }
+      })
+
+      url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+steam_api_key+"&steamid="+row.steamid+"&format=json&include_appinfo=1"
+      request({
+        url: url,
+        json: true
+      }, function (error, response, body) {
+        if(body.response.games)
+        {
+          games = body.response.games
+        }
+      })
+
+    })
+
+    res.render('index', { user: req.user, users: users, player: player,games: games });
+
+  });
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
