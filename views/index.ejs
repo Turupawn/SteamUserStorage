@@ -1,67 +1,35 @@
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-
-
-<% if (!user) { %>
-	<h2>Welcome! Please log in.</h2>
-	<p><a href="auth/steam">Sign On with Steam</a></p>
-<% } else { %>
-	<h2>Hello, <%= user.displayName %>. - <a href='logout'>Logout</a></h2>
-<% } %>
-
-<% if(users) {%>
-  <% for(i=0;i<users.length;i++){ %>
-<!--
-    <h2><%=JSON.parse(users[i].summary).personaname%></h2>
-    <p><%=JSON.parse(users[i].summary).profileurl%></p>
-    <p><img src="<%=JSON.parse(users[i].summary).avatar%>"/></p>
-    <p><img src="<%=JSON.parse(users[i].summary).avatarmedium%>"/></p>
-    <p><img src="<%=JSON.parse(users[i].summary).avatarfull%>"/></p>
-    <p><%=JSON.parse(users[i].summary).loccountrycode%></p>
-    <p><%=JSON.parse(users[i].summary).locstatecode%></p>
-    <p><%=JSON.parse(users[i].summary).loccityid%></p>
-    <div id="user_<%=JSON.parse(users[i].summary).steamid%>">
-    </div>
-    <div id="games_<%=JSON.parse(users[i].summary).steamid%>">
-    </div>
--->
-<script>
-
-  function isFightingGame(appid)
-  {
-    if(appid==406440||appid==376300||appid==222440||appid==311730||appid==222420||appid==319280||appid==45760||appid==281050||appid==262150||appid==245170||appid==208610||appid==222940||appid==244730)
-      return true
-    return false
-  }
-
-  var ul_node = document.createElement("ul");
-  <% for(j=0;j<JSON.parse(users[i].games).length;j++){ %>
-    if(isFightingGame(<%= JSON.parse(users[i].games)[j].appid %>)){
-      var node = document.createElement("li");
-      var textnode = document.createTextNode("<%= JSON.parse(users[i].games)[j].name %>");
-      node.appendChild(textnode);
-      ul_node.appendChild(node); 
-    }
-  <% } %>
-  document.getElementById("games_<%=JSON.parse(users[i].summary).steamid%>").appendChild(ul_node);
-</script>
-
-  <% } %>
-<% } %>
-
-
-
-<!-- Should redirect to homepage if you're not logged in -->
-<!--
-<p><a href="account">See Account Information</a></p>
--->
-
-
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Simple Map</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Steam Fighter Finder</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="/bootstrap/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/bootstrap/justified-nav.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="/bootstrap/assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="/bootstrap/assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
@@ -70,15 +38,69 @@
         margin: 0;
         padding: 0;
       }
-      #map {
-        height: 100%;
-      }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
   </head>
+
   <body>
-    <div id="map"></div>
+
+    <div class="container">
+
+      <!-- The justified navigation menu is meant for single line per list item.
+           Multiple lines will require custom code not provided by Bootstrap. -->
+
+      <!-- Jumbotron -->
+      <div class="jumbotron">
+        <h1>Steam Fighter Finder</h1>
+        <p class="lead">Find who is playing fighting games near you</p>
+        <% if (!user) { %>
+          <p><a class="btn btn-lg btn-success" href="auth/steam" role="button">Sign in with Steam</a></p>
+        <% } else { %>
+	        <p>Signed in as, <%= user.displayName %> <a href='logout'>Logout</p></h2>
+        <% } %>
+      </div>
+
+
+
+<!--
+      <div class="row">
+        <div class="col-lg-4">
+          <h2>Safari bug warning!</h2>
+          <p class="text-danger">As of v8.0, Safari exhibits a bug in which resizing your browser horizontally causes rendering errors in the justified nav that are cleared upon refreshing.</p>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn btn-primary" href="#" role="button">View details &raquo;</a></p>
+
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2016 Turupawn</p>
+      </footer>
+-->
+
+    </div> <!-- /container -->
+
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/bootstrap/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
+
+
+
+    <div id="map" style="height: 100%;"></div>
+
     <script>
-      var map;
+    function isFightingGame(appid)
+    {
+      if(appid==406440||appid==376300||appid==222440||appid==311730||appid==222420||appid==319280||appid==45760||appid==281050||appid==262150||appid==245170||appid==208610||appid==222940||appid==244730||appid==310950)
+        return true
+      return false
+    }
+
+    var map;
+
 function initMap() {
 
   var myLatLng = {lat: -25.363, lng: 131.044};
@@ -90,20 +112,11 @@ function initMap() {
     zoom: 12
   });
 
-  // Create a marker and set its position.
-  var marker = new google.maps.Marker({
-    map: map,
-    position: myLatLng,
-    title: 'Hello Worldz!'
-  });
-
 <%for(i=0;i<users.length;i++){%>
 
 $.getJSON('steam_countries.min.json', function(data) {
   lat = parseFloat(data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"]["coordinates"].split(",")[0] );
   lng = parseFloat(data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"]["coordinates"].split(",")[1] );
-//  lat+=(Math.random()*0.2)
-//  lng+=(Math.random()*0.2)
 lng+=<%=i%>*0.012
 
   var marker = new google.maps.Marker({
@@ -115,13 +128,39 @@ lng+=<%=i%>*0.012
 
   infowindow_content = ""
   infowindow_content += "<h2><%=JSON.parse(users[i].summary).personaname%>'s fighting games</h2>"
-infowindow_content += '<h2>'+data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"].name+'</h2>'
+infowindow_content += '<p>City: '+data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"].name+'</p>'
   infowindow_content += "<p>Go to <a href='<%=JSON.parse(users[i].summary).profileurl%>'>steam profile</a></p>"
+
+  game_contents = []
+  game_hours = []
   <% for(j=0;j<JSON.parse(users[i].games).length;j++){ %>
     if(isFightingGame(<%= JSON.parse(users[i].games)[j].appid %>)){
-     infowindow_content += '<img src="http://media.steampowered.com/steamcommunity/public/images/apps/<%=JSON.parse(users[i].games)[j].appid%>/<%=JSON.parse(users[i].games)[j].img_icon_url%>.jpg"/>'
+     game_contents.push('<p><img src="http://media.steampowered.com/steamcommunity/public/images/apps/<%=JSON.parse(users[i].games)[j].appid%>/<%=JSON.parse(users[i].games)[j].img_icon_url%>.jpg"/><%=JSON.parse(users[i].games)[j].name%> <%=(parseInt(JSON.parse(users[i].games)[j].playtime_forever)/60).toFixed(2)%><p>')
+     game_hours.push(<%=(parseInt(JSON.parse(users[i].games)[j].playtime_forever)/60).toFixed(2)%>)
     }
   <% } %>
+
+  for(x=0;x<game_hours.length;x++)
+  {
+    for(y=0;y<game_hours.length;y++)
+    {
+      if(game_hours[x]>game_hours[y])
+      {
+        temp = game_hours[x]
+        game_hours[x] = game_hours[y]
+        game_hours[y] = temp
+
+        temp = game_contents[x]
+        game_contents[x] = game_contents[y]
+        game_contents[y] = temp
+      }
+    }
+  }
+
+  for(x=0;x<game_contents.length;x++)
+  {
+    infowindow_content += game_contents[x]
+  }
 
   var infowindow = new google.maps.InfoWindow({
     content: infowindow_content
@@ -136,12 +175,8 @@ infowindow_content += '<h2>'+data["<%=JSON.parse(users[i].summary).loccountrycod
   });
 
 })
-
 <%}%>
-
 }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjWh-Ry4NVRvyIHvgJiUTbHbfTPMkaKNs&callback=initMap"
     async defer></script>
-  </body>
-</html>

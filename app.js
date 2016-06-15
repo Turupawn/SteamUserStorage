@@ -11,6 +11,8 @@ var jsdom=require('jsdom');
 var request = require("request")
 var Promise = require('promise')
 var steam_api_key = "xxx"
+var website_url="http://smackdown.club:3000"
+//var website_url="http://localhost:3000"
 //CREATE TABLE users (steamid TEXT, summary TEXT, games TEXT);
 //var $=require('jquery')(jsdom.jsdom().createWindow());
 
@@ -39,8 +41,8 @@ passport.deserializeUser(function(obj, done) {
 //   credentials (in this case, an OpenID identifier and profile), and invoke a
 //   callback with a user object.
 passport.use(new SteamStrategy({
-    returnURL: 'http://smackdown.club:3000/auth/steam/return',
-    realm: 'http://smackdown.club:3000/',
+    returnURL: website_url+'/auth/steam/return',
+    realm: website_url,
     apiKey: steam_api_key
   },
   function(identifier, profile, done) {
