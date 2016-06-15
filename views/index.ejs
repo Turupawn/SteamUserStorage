@@ -57,7 +57,7 @@
         <% if (!user) { %>
           <p><a class="btn btn-lg btn-success" href="auth/steam" role="button">Sign in with Steam</a></p>
         <% } else { %>
-	        <p>Signed in as, <%= user.displayName %> <a href='logout'>Logout</p></h2>
+	        <p>Signed in as <%= user.displayName %>, <a href='logout'>Logout</p></h2>
         <% } %>
       </div>
 
