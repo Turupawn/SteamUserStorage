@@ -10,7 +10,7 @@ var express = require('express')
 var jsdom=require('jsdom');
 var request = require("request")
 var Promise = require('promise')
-var steam_api_key = "XXXXXXXXXXXXX"
+var steam_api_key = "xxx"
 //CREATE TABLE users (steamid TEXT, summary TEXT, games TEXT);
 //var $=require('jquery')(jsdom.jsdom().createWindow());
 
