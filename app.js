@@ -10,7 +10,8 @@ var express = require('express')
 var jsdom=require('jsdom');
 var request = require("request")
 var Promise = require('promise')
-var steam_api_key = "xxxxxxxxxxxxxxx"
+var steam_api_key = "XXXXXXXXXXXXX"
+//CREATE TABLE users (steamid TEXT, summary TEXT, games TEXT);
 //var $=require('jquery')(jsdom.jsdom().createWindow());
 
 //var XMLHttpRequest=require('xmlhttprequest').XMLHttpRequest;
@@ -38,8 +39,8 @@ passport.deserializeUser(function(obj, done) {
 //   credentials (in this case, an OpenID identifier and profile), and invoke a
 //   callback with a user object.
 passport.use(new SteamStrategy({
-    returnURL: 'http://192.168.1.153:3000/auth/steam/return',
-    realm: 'http://192.168.1.153:3000/',
+    returnURL: 'http://smackdown.club:3000/auth/steam/return',
+    realm: 'http://smackdown.club:3000/',
     apiKey: steam_api_key
   },
   function(identifier, profile, done) {
@@ -51,32 +52,67 @@ passport.use(new SteamStrategy({
       // to associate the Steam account with a user record in your database,
       // and return that user instead.
 
-      exists = false
-      db.all("SELECT steamid FROM users", function(err, rows)
-      {  
-        rows.forEach(function (row)
-        {  
-          if(row.steamid==profile._json.steamid)
-          {
-            exists = true
-          }
-        })  
+var summary=""
+var games=""
 
-
-        if(!exists)
-        {
-          db.serialize(function()
+      var promise_global = new Promise(function(resolve_global, reject) {
+        var promise_player_summary = new Promise(function(resolve_player, reject) {
+          var player_url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="+steam_api_key+"&steamids="+profile._json.steamid
+          request(
           {
-            var stmt = db.prepare("INSERT INTO users VALUES (?)");
-            stmt.run(profile._json.steamid);
-            stmt.finalize();
+            url: player_url,
+            json: true
+          }, function (error, response, body)
+          {
+            summary=body.response.players[0]
+            resolve_player(body.response.players[0].steamid)
           })
-        }
-      });
+        })
 
-      profile.identifier = identifier;
+        promise_player_summary.then(function(result) {
 
-      return done(null, profile);
+
+          this.steamid=result
+          games_url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+steam_api_key+"&steamid="+steamid+"&format=json&include_appinfo=1"
+          request({
+            url: games_url,
+            json: true
+          }, function (error, response, body) {
+            games=body.response.games
+            resolve_global('')
+          })
+
+
+        })
+
+      })
+
+      promise_global.then(function(result) {
+        exists = false
+        db.all("SELECT steamid FROM users", function(err, rows)
+        {
+          rows.forEach(function (row)
+          {
+            if(row.steamid==profile._json.steamid)
+            {
+              exists = true
+            }
+          })
+          if(!exists)
+          {
+            db.serialize(function()
+            {
+              var stmt = db.prepare("INSERT INTO users VALUES (?,?,?)");
+              stmt.run(profile._json.steamid,JSON.stringify(summary),JSON.stringify(games));
+              stmt.finalize();
+            })
+          }
+        });
+
+        profile.identifier = identifier;
+
+        return done(null, profile);
+      })
     });
   }
 ));
@@ -97,80 +133,15 @@ app.use(session({
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static(__dirname + '/../../public'));
+app.use(express.static('public'));
 
 app.get('/', function(req, res){
 
-  exists = false
-  var games
-
-  db.all("SELECT steamid FROM users", function(err, rows)
+  db.all("SELECT * FROM users", function(err, rows)
   {
-    users=[]
-    //rows.forEach(function (row)
-    for(i=0;i<rows.length;i++)
-    {
-      row=rows[i]
-      users.push(row)
-    }
-
-    var i=0
-    var player=[]
-    var games=[]
-
-
-
-
-
-var finished_games=0
-var finished_players=0
-var promise = new Promise(function(resolve, reject) {
-    for(;i<users.length;i++)
-    {
-      user=users[i]
-      var url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="+steam_api_key+"&steamids="+user.steamid
-      request(
-      {
-        url: url,
-        json: true
-      }, function (error, response, body)
-      {
-        if(body.response.players)
-        {
-          player.push(body.response.players[0])
-        }
-        finished_players++
-        if(finished_games==users.length && finished_players==users.length)
-        {
-          resolve('finished')
-        }
-      })
-      url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+steam_api_key+"&steamid="+user.steamid+"&format=json&include_appinfo=1"
-      request({
-        url: url,
-        json: true
-      }, function (error, response, body) {
-        if(body.response.games)
-        {
-          games.push(body.response.games)
-        }
-        finished_games++
-        if(finished_games==users.length && finished_players==users.length)
-        {
-          resolve('finished')
-        }
-
-      })
-    }
-});
-
-promise.then(function(result) {
-  res.render('index', { user: req.user, users: users, player: player,games: games });
-});
-
-
-
+    res.render('index', { user: req.user, users: rows });
   });
+
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){

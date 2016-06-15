@@ -1,5 +1,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 
+
 <% if (!user) { %>
 	<h2>Welcome! Please log in.</h2>
 	<p><a href="auth/steam">Sign On with Steam</a></p>
@@ -8,42 +9,142 @@
 <% } %>
 
 <% if(users) {%>
+<!--
   <% for(i=0;i<users.length;i++){ %>
-    <h2><%=player[i].personaname%></h2>
-    <div id="user_<%=users[i].steamid%>">
+    <h2><%=JSON.parse(users[i].summary).personaname%></h2>
+    <p><%=JSON.parse(users[i].summary).profileurl%></p>
+    <p><img src="<%=JSON.parse(users[i].summary).avatar%>"/></p>
+    <p><img src="<%=JSON.parse(users[i].summary).avatarmedium%>"/></p>
+    <p><img src="<%=JSON.parse(users[i].summary).avatarfull%>"/></p>
+    <p><%=JSON.parse(users[i].summary).loccountrycode%></p>
+    <p><%=JSON.parse(users[i].summary).locstatecode%></p>
+    <p><%=JSON.parse(users[i].summary).loccityid%></p>
+    <div id="user_<%=JSON.parse(users[i].summary).steamid%>">
     </div>
-    <div id="games_<%=users[i].steamid%>">
+    <div id="games_<%=JSON.parse(users[i].summary).steamid%>">
     </div>
+-->
 
 <script>
+$.getJSON('steam_countries.min.json', function(data) {
+    console.log(data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"]);
+});
+
+
   function isFightingGame(appid)
   {
-    if(appid==406440||appid==376300||appid==222440||appid==311730||appid==222420
-||appid==319280||appid==45760||appid==281050||appid==262150||appid==245170
-||appid==208610||appid==222940||appid==244730
-)
-  return true
+    if(appid==406440||appid==376300||appid==222440||appid==311730||appid==222420||appid==319280||appid==45760||appid==281050||appid==262150||appid==245170||appid==208610||appid==222940||appid==244730)
+      return true
     return false
   }
 
-
   var ul_node = document.createElement("ul");
-  <% for(j=0;j<games[i].length;j++){ %>
-    if(isFightingGame(<%= games[i][j].appid %>)){
+  <% for(j=0;j<JSON.parse(users[i].games).length;j++){ %>
+    if(isFightingGame(<%= JSON.parse(users[i].games)[j].appid %>)){
       var node = document.createElement("li");
-      var textnode = document.createTextNode("<%= games[i][j].name %>");
+      var textnode = document.createTextNode("<%= JSON.parse(users[i].games)[j].name %>");
       node.appendChild(textnode);
       ul_node.appendChild(node); 
     }
   <% } %>
-  document.getElementById("games_<%=users[i].steamid%>").appendChild(ul_node);
+  document.getElementById("games_<%=JSON.parse(users[i].summary).steamid%>").appendChild(ul_node);
 </script>
-
 
   <% } %>
 <% } %>
 
+
+
 <!-- Should redirect to homepage if you're not logged in -->
+<!--
 <p><a href="account">See Account Information</a></p>
+-->
 
 
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map;
+function initMap() {
+
+  var myLatLng = {lat: -25.363, lng: 131.044};
+
+  // Create a map object and specify the DOM element for display.
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: myLatLng,
+    scrollwheel: false,
+    zoom: 8
+  });
+
+  // Create a marker and set its position.
+  var marker = new google.maps.Marker({
+    map: map,
+    position: myLatLng,
+    title: 'Hello Worldz!'
+  });
+
+<%for(i=0;i<users.length;i++){%>
+
+$.getJSON('steam_countries.min.json', function(data) {
+  lat = parseInt(data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"]["coordinates"].split(",")[0] );
+  lng = parseInt(data["<%=JSON.parse(users[i].summary).loccountrycode%>"]["states"]["<%=JSON.parse(users[i].summary).locstatecode%>"]["cities"]["<%=JSON.parse(users[i].summary).loccityid%>"]["coordinates"].split(",")[1] );
+  lat+=(Math.random()*0.2)
+  lng+=(Math.random()*0.2)
+
+  var marker = new google.maps.Marker({
+    map: map,
+    position: {lat: lat, lng: lng},
+    title: 'Hello Worldz!',
+    icon: '<%=JSON.parse(users[i].summary).avatar%>'
+  });
+
+  infowindow_content = ""
+  infowindow_content += "<h2><%=JSON.parse(users[i].summary).personaname%>'s fighting games</h2>"
+  infowindow_content += "<p>Go to <a href='<%=JSON.parse(users[i].summary).profileurl%>'>steam profile</a></p>"
+  <% for(j=0;j<JSON.parse(users[i].games).length;j++){ %>
+    if(isFightingGame(<%= JSON.parse(users[i].games)[j].appid %>)){
+     infowindow_content += '<img src="http://media.steampowered.com/steamcommunity/public/images/apps/<%=JSON.parse(users[i].games)[j].appid%>/<%=JSON.parse(users[i].games)[j].img_icon_url%>.jpg"/>'
+    }
+  <% } %>
+
+  var infowindow = new google.maps.InfoWindow({
+    content: infowindow_content
+  });
+
+  marker.addListener('click', function() {
+    infowindow.open(map, marker);
+  });
+
+  navigator.geolocation.getCurrentPosition(function(pos){
+    map.setCenter(new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude));
+  });
+
+})
+
+<%}%>
+
+}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjWh-Ry4NVRvyIHvgJiUTbHbfTPMkaKNs&callback=initMap"
+    async defer></script>
+  </body>
+</html>
