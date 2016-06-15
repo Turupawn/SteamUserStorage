@@ -9,17 +9,34 @@
 
 <% if(users) {%>
   <% for(i=0;i<users.length;i++){ %>
-    <div id="user_<%=users[i]%>">
+    <h2><%=player[i].personaname%></h2>
+    <div id="user_<%=users[i].steamid%>">
     </div>
-    <div id="games_<%=users[i]%>">
+    <div id="games_<%=users[i].steamid%>">
     </div>
 
 <script>
-<% console.log(player) %>
-        $( "#user_<%=users[i]%>" ).append( "<h2><%=player.personaname%></h2>" );
-        $( "#games_<%=users[i]%>" ).append( "<ul>" );
+  function isFightingGame(appid)
+  {
+    if(appid==406440||appid==376300||appid==222440||appid==311730||appid==222420
+||appid==319280||appid==45760||appid==281050||appid==262150||appid==245170
+||appid==208610||appid==222940||appid==244730
+)
+  return true
+    return false
+  }
 
-        $( "#games_<%=users[i]%>" ).append( "</ul>" );
+
+  var ul_node = document.createElement("ul");
+  <% for(j=0;j<games[i].length;j++){ %>
+    if(isFightingGame(<%= games[i][j].appid %>)){
+      var node = document.createElement("li");
+      var textnode = document.createTextNode("<%= games[i][j].name %>");
+      node.appendChild(textnode);
+      ul_node.appendChild(node); 
+    }
+  <% } %>
+  document.getElementById("games_<%=users[i].steamid%>").appendChild(ul_node);
 </script>
 
 
